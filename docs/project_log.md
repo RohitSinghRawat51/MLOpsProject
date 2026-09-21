@@ -8,6 +8,6 @@
 - 2010 holds about two-thirds of the missing minutes, including the longest gap (7,226 min from 2010-08-17).
 
 ## Decisions
-- Convert to hourly averages for forecasting.
-- Fill short gaps (a few hours) by interpolation; leave long gaps empty so models are never trained or scored on invented readings.
-- Meter outages are data-quality problems, not drift. Keep them out of drift tests.
+- Converted to hourly averages for forecasting.
+- Filled short gaps (a few hours) by interpolation; leave long gaps empty so models are never trained or scored on invented readings.
+- Meter outages are data-quality problems, not drift. Kept them out of drift tests.
