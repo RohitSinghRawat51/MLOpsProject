@@ -1,0 +1,16 @@
+# virtual environment (rebuild for requirements.txt)
+.venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+#raw dataset 
+data/
+
+# experiment tracking and notebooks
+mlruns/
+/ipynub_checkpoints/
+
+#secrets
+.env
