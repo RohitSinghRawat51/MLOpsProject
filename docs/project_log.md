@@ -28,3 +28,14 @@
   (a row must never see its own value in its own rolling window).
 - Dropped rows without a full week of lag history: 34,589 -> 33,455 rows, 7 -> 16 columns.
 - Saved to data/features.csv (not versioned; regenerate via src/features.py).
+
+
+## Future extension: EIA.gov API (idea, not yet implemented)
+- EIA (U.S. Energy Information Administration) offers a free API (v2, key required)
+  with current hourly electricity demand data by grid/balancing authority.
+- Different granularity than UCI data (grid-level demand vs single-household meter
+  readings) -- cannot be concatenated with the current dataset directly.
+- Possible use: a second, independent 2026 case study once the drift-detection and
+  retraining pipeline works on the UCI dataset -- run the same pipeline against
+  real current EIA data to test generalization.
+- Not started. Revisit after Step: automated retraining + champion-challenger.
