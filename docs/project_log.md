@@ -39,3 +39,13 @@
   retraining pipeline works on the UCI dataset -- run the same pipeline against
   real current EIA data to test generalization.
 - Not started. Revisit after Step: automated retraining + champion-challenger.
+
+## Future extension: Time Series Foundation Models (TSFM) comparison
+- 2026 research shows pre-trained, zero-shot forecasters (Chronos-2, TimesFM-3, Moirai-2)
+  can forecast without training on our data, and perform comparably to trained models
+  on load/energy data (arXiv:2602.10848; arXiv:2410.09487).
+- Plan: after our own RF/XGBoost/LSTM models exist, add a zero-shot Chronos-2 forecast
+  as an extra comparison point (no training needed, just call the pretrained model).
+- Relevant to research gap: model/tool comparison, and as a check on whether a
+  foundation model degrades under drift the same way our trained models do.
+- Not started yet. Revisit after Step: model training (RF/XGBoost/LSTM).
