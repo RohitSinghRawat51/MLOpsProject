@@ -11,3 +11,20 @@
 - Converted to hourly averages for forecasting.
 - Filled short gaps (a few hours) by interpolation; leave long gaps empty so models are never trained or scored on invented readings.
 - Meter outages are data-quality problems, not drift. Kept them out of drift tests.
+
+## Resampling and gap-filling (src/preprocess.py)
+- Resampled minute-level data to hourly means: 2,075,259 rows -> 34,589 hourly rows.
+- Interpolated gaps up to 3 hours (time-based interpolation, inside the series only).
+- Before filling: 421 missing hours. After filling short gaps: 399 missing hours remain.
+- Remaining 7 gaps match the known long outages found in the minute-level analysis
+  (e.g. ~116 hours in Aug 2010 corresponds to the 7,226-minute gap).
+- Saved to data/hourly_clean.csv (not versioned; regenerate via src/preprocess.py).
+
+## Feature engineering (src/features.py)
+- Built from data/hourly_clean.csv (34,589 hourly rows).
+- Time features: hour, day_of_week, month, is_weekend.
+- Lag features: Global_active_power at 1h, 24h, 168h (1 week) ago.
+- Rolling features: 24h rolling mean/std, shifted by 1h first to avoid leakage
+  (a row must never see its own value in its own rolling window).
+- Dropped rows without a full week of lag history: 34,589 -> 33,455 rows, 7 -> 16 columns.
+- Saved to data/features.csv (not versioned; regenerate via src/features.py).
