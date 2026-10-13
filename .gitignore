@@ -14,3 +14,8 @@ mlruns/
 
 #secrets
 .env
+
+#mlflow
+mlflow.db
+
+.vscode
