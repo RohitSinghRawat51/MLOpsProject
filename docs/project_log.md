@@ -49,3 +49,14 @@
 - Relevant to research gap: model/tool comparison, and as a check on whether a
   foundation model degrades under drift the same way our trained models do.
 - Not started yet. Revisit after Step: model training (RF/XGBoost/LSTM).
+
+## LSTM (src/train_lstm.py)
+- Single-feature sequence model: past 24 hours of raw Global_active_power predicts
+  the next hour. Windows that cross a known data gap (meter outage) are skipped.
+- Scaled with MinMaxScaler fit on train only; architecture: one LSTM layer
+  (32 units) + a Dense(1) output; trained 10 epochs, Adam optimizer, MSE loss.
+- Result (validation): MAE 0.4106, RMSE 0.5657 -- beats the seasonal-naive baseline
+  (MAE 0.5656) by ~27%, but behind Random Forest (0.3590) and XGBoost (0.3610).
+- Not a fully fair comparison yet: RF/XGBoost also see hour/day/month/rolling
+  features, while this LSTM only sees raw past consumption. A multivariate LSTM
+  (same engineered features fed in per timestep) is a natural next improvement.
