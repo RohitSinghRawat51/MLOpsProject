@@ -74,3 +74,11 @@
 - Reference-year test (Step 44): Aug 2010 vs each earlier August, as PSI / KS / Wasserstein (kW). 2007: 3.550 / 0.393 / 0.333. 2008: 5.093 / 0.780 / 0.242. 2009: 0.272 / 0.230 / 0.148. Pooled 2007+2009: 1.405 / 0.199 / 0.239. Pooled all three: 2.319 / 0.395 / 0.137.
 - Finding: August consumption varies strongly year to year (monthly means 0.76, 0.28, 0.66, 0.52 kW), so no single August is a fair reference. Only Aug 2009 resembles Aug 2010. The earlier hypothesis that only Aug 2008 was atypical was partly wrong: Aug 2007 also differs, in level.
 - The three measures disagree on the pooled reference (lowest Wasserstein but PSI 2.3), so one textbook threshold is unreliable here. Next: measure natural year-to-year variation for each month to calibrate thresholds (Step 45).
+
+## Natural year-to-year variation (Step 45, src/explore_variations.py)
+- For each calendar month: largest PSI/KS/Wasserstein among 2007, 2008 and 2009 pairs (assumed drift-free), versus 2010 vs 2009.
+- The largest PSI among the 2007-2009 pairs exceeds 0.25 in 9 of 11 months (all 11 above 0.1); biggest: Aug 5.41, Apr 2.46, Jul 1.42, Sep 1.19.
+- 2010 vs 2009 PSI above 0.25 in Feb (0.394), Jul (0.322), Aug (0.272). Only Feb also exceeds the natural range on PSI and KS; no month exceeds it on Wasserstein.
+- Conclusion: the earlier August alarm (PSI 1.22 / 3.85) lies within normal year-to-year variation. Feb 2010 is the only candidate for a real change.
+- Design implication: use a same-calendar-month reference and thresholds calibrated from natural variation, not 0.1 / 0.25.
+- Caveat: "natural max" is a max over three pairs, which overstates variation versus a single comparison.
