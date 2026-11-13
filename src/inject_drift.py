@@ -1,23 +1,26 @@
 import numpy as np
 import pandas as pd
-from features import add_lag_features, add_rolling_features
+
+from features import build_feature_table
+from split import split_data
+
 TARGET = "Global_active_power"
 
 
 def inject_drift(df, kind, start, magnitude=0.5, ramp_days=60, period_days=60):
     """Return a copy of df with synthetic drift applied to TARGET from `start`.
 
-    The lag and rolling features are rebuilt from the drifted target, so every
-    feature stays consistent with it.
+    df must have the full hourly index (gaps left as NaN), so that lag and
+    rolling features can be rebuilt correctly afterwards.
 
     kind:
       sudden      multiply consumption by (1 + magnitude) from `start` on
       gradual     same, but the multiplier ramps in linearly over ramp_days
-      recurring   the sudden shift is on for period_days, off for period_days, repeating
+      recurring   the shift is on for period_days, off for period_days, repeating
     """
     out = df.copy()
     start = pd.Timestamp(start)
-    days = (out.index - start).total_seconds() / 86400
+    days = np.asarray((out.index - start).total_seconds() / 86400)
     if kind == "sudden":
         factor = np.where(days >= 0, 1 + magnitude, 1.0)
     elif kind == "gradual":
@@ -27,24 +30,26 @@ def inject_drift(df, kind, start, magnitude=0.5, ramp_days=60, period_days=60):
         factor = np.where(on, 1 + magnitude, 1.0)
     else:
         raise ValueError(f"unknown drift kind: {kind}")
-
     out[TARGET] = out[TARGET] * factor
-
-    base = out[[TARGET]].copy()
-    base = add_lag_features(base)
-    base = add_rolling_features(base)
-    for col in base.columns:
-        if col != TARGET:
-            out[col] = base[col].combine_first(out[col])
     return out
 
 
+def make_drifted_prod(kind, start, **kwargs):
+    """Simulated-production data with drift injected and all features rebuilt."""
+    hourly = pd.read_csv("data/hourly_clean.csv", index_col=0, parse_dates=True)
+    drifted = inject_drift(hourly, kind, start, **kwargs)
+    return split_data(build_feature_table(drifted))[2]
 
 
 if __name__ == "__main__":
     prod = pd.read_csv("data/prod.csv", index_col=0, parse_dates=True)
-    for kind in ("sudden", "gradual", "recurring"):
-        d = inject_drift(prod, kind, "2010-05-01")
-        before = d.loc[:"2010-04-30", TARGET].mean()
-        after = d.loc["2010-08-01":, TARGET].mean()
-        print(f"{kind:<10} mean before start: {before:.3f}   mean from Aug: {after:.3f}")
+    start = "2010-05-01"
+    d = make_drifted_prod("sudden", start)
+
+    print("same rows as original prod:", d.index.equals(prod.index), f"({len(prod)} rows)")
+    before = prod.index < start
+    print("identical before start:   ", np.allclose(d.loc[before], prod.loc[before]))
+
+    late = prod.index >= pd.Timestamp(start) + pd.Timedelta(days=8)
+    for col in (TARGET, f"{TARGET}_lag_1h", f"{TARGET}_lag_168h", f"{TARGET}_roll_mean_24h"):
+        print(f"{col:<38} after/before ratio: {(d.loc[late, col] / prod.loc[late, col]).mean():.3f}")

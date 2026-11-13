@@ -88,3 +88,8 @@
 - PSI-flagged months did not degrade (Feb +1%, Jul +3%, Aug -31%); the largest increases were in low-PSI months (Jun +10%, May +6%).
 - Correlation of monthly drift score with error change, n=11: PSI -0.14, KS -0.42, Wasserstein -0.46 (none significant, p >= 0.16).
 - Conclusion: the held-out 2010 year contains no meaningful accuracy degradation, so a PSI trigger would have retrained for no benefit. Natural data has no real drift to detect, so drift will be injected with known type, size and start (Step 47).
+
+## Synthetic drift injector (Step 47, src/inject_drift.py)
+- Natural 2010 data has no meaningful drift, so drift of known type, size and start is injected to score detectors: sudden, gradual (60-day ramp) and recurring (60-day on/off), magnitude +50% by default.
+- Drift is applied to the target in hourly_clean.csv (full hourly index, gaps as NaN), then lag/rolling features are rebuilt with build_feature_table and the production slice is taken with split_data.
+- Lesson: an earlier version rebuilt lags positionally on prod.csv, where outage hours are already removed; the first row after an outage got a wrong lag (1.383 vs true 1.22 in a synthetic test). Injecting before feature building avoids this.
