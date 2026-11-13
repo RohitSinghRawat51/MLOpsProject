@@ -82,3 +82,9 @@
 - Conclusion: the earlier August alarm (PSI 1.22 / 3.85) lies within normal year-to-year variation. Feb 2010 is the only candidate for a real change.
 - Design implication: use a same-calendar-month reference and thresholds calibrated from natural variation, not 0.1 / 0.25.
 - Caveat: "natural max" is a max over three pairs, which overstates variation versus a single comparison.
+
+## Does drift score predict forecast error? (Step 46, src/explore_error.py)
+- Random Forest trained on 2006-2008 only, never retrained. Monthly MAE 2010 vs 2009: mean change -0.011 kW (-3%); 10 of 11 months moved by less than ~10%; Aug 2010 error dropped 31%.
+- PSI-flagged months did not degrade (Feb +1%, Jul +3%, Aug -31%); the largest increases were in low-PSI months (Jun +10%, May +6%).
+- Correlation of monthly drift score with error change, n=11: PSI -0.14, KS -0.42, Wasserstein -0.46 (none significant, p >= 0.16).
+- Conclusion: the held-out 2010 year contains no meaningful accuracy degradation, so a PSI trigger would have retrained for no benefit. Natural data has no real drift to detect, so drift will be injected with known type, size and start (Step 47).
