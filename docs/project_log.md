@@ -70,3 +70,7 @@
 - PSI breakdown (Step 43): in August, 3 reference buckets (each 10% of reference hours, all below 0.187 kW) are empty in Aug 2010; each costs ~0.69, together 54% of the 3.845. About 60% of reference August hours are below 0.236 kW vs under 3% in Aug 2010.
 - Aug 2008 is unusually quiet (mean 0.277, median 0.208 kW vs 0.66-0.76 mean in other Augusts) and makes up half of the training-August reference. Hypothesis: the reference is atypical, not necessarily the household drifting. Testing in Step 44.
 - January breakdown is healthy: every bucket contribution below 0.04, PSI 0.0736.
+
+- Reference-year test (Step 44): Aug 2010 vs each earlier August, as PSI / KS / Wasserstein (kW). 2007: 3.550 / 0.393 / 0.333. 2008: 5.093 / 0.780 / 0.242. 2009: 0.272 / 0.230 / 0.148. Pooled 2007+2009: 1.405 / 0.199 / 0.239. Pooled all three: 2.319 / 0.395 / 0.137.
+- Finding: August consumption varies strongly year to year (monthly means 0.76, 0.28, 0.66, 0.52 kW), so no single August is a fair reference. Only Aug 2009 resembles Aug 2010. The earlier hypothesis that only Aug 2008 was atypical was partly wrong: Aug 2007 also differs, in level.
+- The three measures disagree on the pooled reference (lowest Wasserstein but PSI 2.3), so one textbook threshold is unreliable here. Next: measure natural year-to-year variation for each month to calibrate thresholds (Step 45).
