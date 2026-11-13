@@ -29,7 +29,22 @@ def month_values(df, target, month):
     """All values from a given calendar month, across every year in df."""
     return df[df.index.month == month][target].values
 
-
+def psi_table(reference, current, bins=10):
+    """Same calculation as calculate_psi, but returns the per-bin breakdown."""
+    edges = np.quantile(reference, np.linspace(0, 1, bins + 1))
+    edges[0], edges[-1] = -np.inf, np.inf
+    ref_pct = np.histogram(reference, bins=edges)[0] / len(reference)
+    cur_pct = np.histogram(current, bins=edges)[0] / len(current)
+    eps = 1e-4
+    ref_adj = np.where(ref_pct == 0, eps, ref_pct)
+    cur_adj = np.where(cur_pct == 0, eps, cur_pct)
+    contrib = (cur_adj - ref_adj) * np.log(cur_adj / ref_adj)
+    return pd.DataFrame({
+        "bin_upper_edge": edges[1:],
+        "ref_%": (ref_pct * 100).round(1),
+        "cur_%": (cur_pct * 100).round(1),
+        "psi_contribution": contrib.round(3),
+    })
 
 if __name__ == "__main__":
     train = pd.read_csv("data/train.csv", index_col=0, parse_dates=True)
@@ -62,3 +77,8 @@ if __name__ == "__main__":
     aug_reference = month_values(train, TARGET, 8)
     psi_aug_same_season = calculate_psi(aug_reference, august)
     print(f"PSI (train Augusts only vs Aug 2010):   {psi_aug_same_season:.4f}")
+
+    print("\nAugust breakdown (train Augusts vs Aug 2010):")
+    print(psi_table(aug_reference, august).to_string(index=False))
+    print("\nJanuary breakdown (train Januaries vs Jan 2010):")
+    print(psi_table(jan_reference, first_month).to_string(index=False))

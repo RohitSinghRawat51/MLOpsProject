@@ -66,3 +66,7 @@
 - PSI vs a same-calendar-month reference: Jan = 0.0736 (no meaningful shift), Aug = 3.8450 (higher).
 - Reading: seasonality explains January but not August. Investigating per-year August values (Step 42).
 - Correction: the TSFM benchmark (arXiv:2602.10848) tested Chronos-Bolt, Chronos-2, Moirai-2 and TinyTimeMixer on ERCOT hourly load; it did not test TimesFM-3.
+
+- PSI breakdown (Step 43): in August, 3 reference buckets (each 10% of reference hours, all below 0.187 kW) are empty in Aug 2010; each costs ~0.69, together 54% of the 3.845. About 60% of reference August hours are below 0.236 kW vs under 3% in Aug 2010.
+- Aug 2008 is unusually quiet (mean 0.277, median 0.208 kW vs 0.66-0.76 mean in other Augusts) and makes up half of the training-August reference. Hypothesis: the reference is atypical, not necessarily the household drifting. Testing in Step 44.
+- January breakdown is healthy: every bucket contribution below 0.04, PSI 0.0736.
