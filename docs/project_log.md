@@ -60,3 +60,9 @@
 - Not a fully fair comparison yet: RF/XGBoost also see hour/day/month/rolling
   features, while this LSTM only sees raw past consumption. A multivariate LSTM
   (same engineered features fed in per timestep) is a natural next improvement.
+
+  ## Drift detection: first PSI results (src/drift.py)
+- PSI vs the full 2-year training reference: Jan 2010 = 0.9677, Aug 2010 = 1.2220.
+- PSI vs a same-calendar-month reference: Jan = 0.0736 (no meaningful shift), Aug = 3.8450 (higher).
+- Reading: seasonality explains January but not August. Investigating per-year August values (Step 42).
+- Correction: the TSFM benchmark (arXiv:2602.10848) tested Chronos-Bolt, Chronos-2, Moirai-2 and TinyTimeMixer on ERCOT hourly load; it did not test TimesFM-3.
