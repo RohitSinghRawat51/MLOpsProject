@@ -90,3 +90,14 @@ report("No drift (control)", score_frame(prod))
 for kind in ("sudden", "gradual", "recurring"):
     stream = make_drifted_prod(kind, DRIFT_START, magnitude=MAGNITUDE)
     report(f"{kind} drift, +{int(MAGNITUDE * 100)}% from {DRIFT_START.date()}", score_frame(stream), DRIFT_START)
+
+
+print("--- Which 2009 weeks set the thresholds? ---")
+print(sf_val.sort_values("psi_month", ascending=False).head(5)[["end", "psi_month", "ks_month", "mae"]].round(3).to_string())
+print("\n--- Largest 2009 score per calendar month (by window start) ---")
+print(sf_val.groupby(sf_val.index.month)[["psi_month", "ks_month", "mae"]].max().round(2).to_string())
+
+sf_s = score_frame(make_drifted_prod("sudden", DRIFT_START, magnitude=MAGNITUDE))
+missed = sf_s[(sf_s.index >= DRIFT_START) & (sf_s["mae"] <= thr["mae"])]
+print("\n--- Sudden-drift weeks the error trigger did NOT flag ---")
+print(missed[["end", "mae"]].round(3).to_string())

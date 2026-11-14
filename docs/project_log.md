@@ -93,3 +93,11 @@
 - Natural 2010 data has no meaningful drift, so drift of known type, size and start is injected to score detectors: sudden, gradual (60-day ramp) and recurring (60-day on/off), magnitude +50% by default.
 - Drift is applied to the target in hourly_clean.csv (full hourly index, gaps as NaN), then lag/rolling features are rebuilt with build_feature_table and the production slice is taken with split_data.
 - Lesson: an earlier version rebuilt lags positionally on prod.csv, where outage hours are already removed; the first row after an outage got a wrong lag (1.383 vs true 1.22 in a synthetic test). Injecting before feature building avoids this.
+
+## Detector replay on weekly windows (Step 48, src/replay_detectors.py)
+- Thresholds calibrated on drift-free 2009 (max weekly value): PSI same-month 4.929, KS same-month 0.651, Random Forest weekly MAE 0.480.
+- No-drift 2010 control (43 weeks): textbook PSI (>0.25) alarmed 42/43, textbook KS (p<0.05) 37/43; calibrated PSI 2/43, KS 0/43, error-based 0/43.
+- Sudden +50% from 2010-04-30: error-based delay 7 days, 19/26 weeks flagged; calibrated PSI/KS delay 98 days, 3/26; textbook PSI/KS flag every week but also 17/17 and 14/17 pre-drift weeks.
+- Gradual: error-based 42 days (13/26); calibrated PSI/KS 98 days (3/26). Recurring: error-based 7 days (12/26); calibrated PSI 98 days (2/26); calibrated KS missed.
+- Findings: textbook thresholds are unusable on this household (seasonality plus autocorrelation); the global calibrated thresholds are probably too high because one worst 2009 week sets them; error-based was the only signal both quiet and fast. Caveat: injected drift is a plain scale-up that hurts the Random Forest by construction.
+- Next: find which 2009 weeks set the thresholds (Step 49), then use month-specific or quantile-based thresholds.
