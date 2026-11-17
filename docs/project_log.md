@@ -101,3 +101,10 @@
 - Gradual: error-based 42 days (13/26); calibrated PSI/KS 98 days (3/26). Recurring: error-based 7 days (12/26); calibrated PSI 98 days (2/26); calibrated KS missed.
 - Findings: textbook thresholds are unusable on this household (seasonality plus autocorrelation); the global calibrated thresholds are probably too high because one worst 2009 week sets them; error-based was the only signal both quiet and fast. Caveat: injected drift is a plain scale-up that hurts the Random Forest by construction.
 - Next: find which 2009 weeks set the thresholds (Step 49), then use month-specific or quantile-based thresholds.
+
+## Retrain + Diebold-Mariano gate (Step 50, src/retrain_demo.py)
+- Sudden +50% drift: champion MAE 0.522 (retrain at +7 days) and 0.540 (+28 days) vs 0.351 and 0.344 with no drift (ratio 1.49 and 1.57 vs 1.50 from scaling alone). The Random Forest absorbs a pure scale-up through its lag features; real loss 0-5%.
+- Best challenger gain only ~3% (0.540 to 0.523); two challengers were "significant" (p<0.05) for tiny gains. No-drift control also promoted one challenger (+3.1%, p<0.0001) simply for having more recent data.
+- Lesson 1: significance alone is not a promotion rule at ~700 hours; added a minimum 5% gain margin.
+- Lesson 2: absolute MAE scales with consumption, so an MAE trigger fires on any scale change; use a scale-free error (MAE / mean load). The Step 48 error-trigger result is partly a scale artifact.
+- Lesson 3: a scale-up is a weak test of harmful drift. Added a "shift" drift (daily routine 3h later) that changes the hour-of-day relationship (Step 51).

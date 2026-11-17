@@ -7,7 +7,7 @@ from split import split_data
 TARGET = "Global_active_power"
 
 
-def inject_drift(df, kind, start, magnitude=0.5, ramp_days=60, period_days=60):
+def inject_drift(df, kind, start, magnitude=0.5, ramp_days=60, period_days=60, shift_hours=3):
     """Return a copy of df with synthetic drift applied to TARGET from `start`.
 
     df must have the full hourly index (gaps left as NaN), so that lag and
@@ -21,7 +21,11 @@ def inject_drift(df, kind, start, magnitude=0.5, ramp_days=60, period_days=60):
     out = df.copy()
     start = pd.Timestamp(start)
     days = np.asarray((out.index - start).total_seconds() / 86400)
-    if kind == "sudden":
+    if kind == "shift":
+        # the daily routine moves later by shift_hours (e.g. the evening peak 3 hours later)
+        out[TARGET] = np.where(days >= 0, out[TARGET].shift(shift_hours).values, out[TARGET].values)
+        return out
+    elif kind == "sudden":
         factor = np.where(days >= 0, 1 + magnitude, 1.0)
     elif kind == "gradual":
         factor = 1 + magnitude * np.clip(days / ramp_days, 0, 1)

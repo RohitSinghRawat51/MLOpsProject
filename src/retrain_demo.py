@@ -14,11 +14,13 @@ FEATURES = [
 DRIFT_START = pd.Timestamp("2010-04-30")
 ALARM_END = pd.Timestamp("2010-05-07")   # first window the error trigger flagged (Step 48)
 SHADOW_DAYS = 28                          # how long the challenger is tested before a decision
-MAGNITUDE = 0.5                          # set to 0 for a no-drift control run
+KIND = "shift"                            # "sudden" (scale-up) or "shift" (daily pattern moves 3h later)
+MAGNITUDE = 0.5                           # for "sudden"; set to 0 for a no-drift control run
+MIN_GAIN = 0.05                           # challenger must also be at least 5% better, not just significant
 
 read = lambda n: pd.read_csv(f"data/{n}.csv", index_col=0, parse_dates=True)
 train, val = read("train"), read("val")
-stream = make_drifted_prod("sudden", DRIFT_START, magnitude=MAGNITUDE)
+stream = make_drifted_prod(KIND, DRIFT_START, **({"magnitude": MAGNITUDE} if KIND == "sudden" else {}))
 history = pd.concat([train, val, stream])     # everything that exists, in time order
 
 
@@ -60,11 +62,13 @@ for wait_days in (7, 28):                     # label-collection time after the 
         challenger = fit(data)
         e_champ, e_chall = abs_err(champion, shadow), abs_err(challenger, shadow)
         stat, p = diebold_mariano(e_champ, e_chall)
+        gain = 1 - e_chall.mean() / e_champ.mean()
         rows.append({
             "wait (days)": wait_days, "training data": label, "train rows": len(data),
-            "champion MAE": round(e_champ.mean(), 3), "challenger MAE": round(e_chall.mean(), 3),
+            "champion MAE": round(e_champ.mean(), 3), "champ MAE / mean load": round(e_champ.mean() / shadow[TARGET].mean(), 3),
+            "challenger MAE": round(e_chall.mean(), 3), "gain": f"{gain:+.1%}",
             "DM stat": round(stat, 2), "p-value": round(p, 4),
-            "promote?": "YES" if (stat > 0 and p < 0.05) else "no",
+            "promote?": "YES" if (stat > 0 and p < 0.05 and gain >= MIN_GAIN) else "no",
         })
-print(f"Shadow test on the {SHADOW_DAYS} days after retraining (sudden {MAGNITUDE:+.0%} drift from {DRIFT_START.date()})\n")
+print(f"Shadow test on the {SHADOW_DAYS} days after retraining ({KIND} drift from {DRIFT_START.date()}, magnitude {MAGNITUDE})\n")
 print(pd.DataFrame(rows).to_string(index=False))
