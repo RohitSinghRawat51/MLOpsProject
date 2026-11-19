@@ -108,3 +108,13 @@
 - Lesson 1: significance alone is not a promotion rule at ~700 hours; added a minimum 5% gain margin.
 - Lesson 2: absolute MAE scales with consumption, so an MAE trigger fires on any scale change; use a scale-free error (MAE / mean load). The Step 48 error-trigger result is partly a scale artifact.
 - Lesson 3: a scale-up is a weak test of harmful drift. Added a "shift" drift (daily routine 3h later) that changes the hour-of-day relationship (Step 51).
+
+## Pattern-shift drift and the gate (Step 51)
+- Shift drift (daily routine 3h later) from 2010-04-30 hurts the Random Forest: champion MAE 0.400 / 0.404 vs 0.351 / 0.344 with no drift (about +14% / +17%), unlike the +50% scale-up (0-5%).
+- Retraining after 7 days: no useful gain (+1.3%, -0.5%, +2.1%; p >= 0.10). After 28 days: all history +3.3% (p<0.0001, rejected by the 5% margin); last 180 days +10.8% and last 60 days +10.9% (both promoted).
+- Recent-window retraining beats all-history: 28 new days are ~2% of all history, 16% of 180 days, 47% of 60 days.
+- Caveat: one scenario and size; configuration picked from six tested on the same shadow period, so the gain is optimistic.
+
+## MLflow registry pipeline (Step 52, src/gate.py, src/pipeline.py, src/rollback.py)
+- Model "electricity-forecaster": v1 = initial champion (trained 2006-2008). After an alarm, wait 28 days, train a challenger on the last 180 days, shadow-test 28 days, gate = Diebold-Mariano p<0.05 AND gain >= 5%.
+- Every challenger is registered with params, metrics and a gate tag; the "champion" alias moves only if the gate passes. rollback.py restores any older version.
