@@ -118,3 +118,10 @@
 ## MLflow registry pipeline (Step 52, src/gate.py, src/pipeline.py, src/rollback.py)
 - Model "electricity-forecaster": v1 = initial champion (trained 2006-2008). After an alarm, wait 28 days, train a challenger on the last 180 days, shadow-test 28 days, gate = Diebold-Mariano p<0.05 AND gain >= 5%.
 - Every challenger is registered with params, metrics and a gate tag; the "champion" alias moves only if the gate passes. rollback.py restores any older version.
+
+## Real pipeline result (Step 52) and serving (Step 53, src/serve.py)
+- pipeline.py on real data: champion v1 (MAE 0.404 under shift drift) vs challenger trained on the last 180 days (0.361): gain +10.8%, DM stat 7.20, p<0.0001 -> PROMOTED v2.
+- FastAPI service: GET /health, POST /predict (engineered features), POST /forecast (timestamp + last 168 hours; features built server-side exactly like features.py), POST /reload (re-reads the champion alias without restart).
+- Start with: uvicorn serve:app --app-dir src --port 8000. Interactive docs at /docs.
+- Checked: features built from raw history equal features.py output; invalid inputs return 422.
+- To do: separate registry name for simulated-drift experiments so they never feed the serving model.

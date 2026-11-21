@@ -41,7 +41,8 @@ def register(model, X, run_name, params, metrics, tags):
         mlflow.log_params(params)
         mlflow.log_metrics(metrics)
         mlflow.set_tags(tags)
-        signature = infer_signature(X.head(5), model.predict(X.head(5)))
+        sample = X.head(5).astype("float64")   # doubles, so MLflow does not warn about integer columns
+        signature = infer_signature(sample, model.predict(sample))
         mlflow.sklearn.log_model(
             model, name="model", signature=signature, registered_model_name=MODEL_NAME,
             skops_trusted_types=["sklearn.tree._tree.Tree"],
